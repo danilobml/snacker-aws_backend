@@ -25,7 +25,7 @@ export class SnackerAwsBackendStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    const lambdaFunction = new lambda.Function(this, 'snacker-lambda', {
+    const lambdaFunction = new lambda.Function(this, 'SnackerLambda', {
       runtime: lambda.Runtime.NODEJS_14_X,
       handler: 'index.handler',
       environment: {
@@ -40,7 +40,7 @@ export class SnackerAwsBackendStack extends cdk.Stack {
 
     const lambdaIntegration = new apigateway.LambdaIntegration(lambdaFunction);
 
-    const snackerApi = new apigateway.RestApi(this, 'snacker-api');
+    const snackerApi = new apigateway.RestApi(this, 'SnackerApi');
     const categoriesResource = snackerApi.root.addResource('categories');
     categoriesResource.addMethod('GET', lambdaIntegration);
     const featuredResource = snackerApi.root.addResource('featured');
