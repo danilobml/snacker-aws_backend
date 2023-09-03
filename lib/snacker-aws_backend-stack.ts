@@ -47,7 +47,7 @@ export class SnackerAwsBackendStack extends cdk.Stack {
     }); 
 
     const lambdaFunction = new lambda.Function(this, 'SnackerLambda', {
-      runtime: lambda.Runtime.NODEJS_14_X,
+      runtime: lambda.Runtime.NODEJS_16_X,
       handler: 'index.handler',
       environment: {
         CATEGORIES_TABLE_NAME: categoriesTable.tableName,
@@ -60,25 +60,40 @@ export class SnackerAwsBackendStack extends cdk.Stack {
     });
 
     categoriesTable.grantReadData(lambdaFunction);
+    categoriesTable.grantWriteData(lambdaFunction);
     dishesTable.grantReadData(lambdaFunction);
+    dishesTable.grantWriteData(lambdaFunction);
     restaurantsTable.grantReadData(lambdaFunction);
+    restaurantsTable.grantWriteData(lambdaFunction);
     featuredTable.grantReadData(lambdaFunction);
+    featuredTable.grantWriteData(lambdaFunction);
+
     snackerS3Bucket.grantRead(lambdaFunction);
 
     const lambdaIntegration = new apigateway.LambdaIntegration(lambdaFunction);
 
-    const snackerApi = new apigateway.RestApi(this, 'SnackerApi');
+    const snackerApi = new apigateway.RestApi(this, 'SnackerApi', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+      },
+    });
     const categoriesResource = snackerApi.root.addResource('categories');
     categoriesResource.addMethod('GET', lambdaIntegration);
+    categoriesResource.addMethod('POST', lambdaIntegration);
     const dishesResource = snackerApi.root.addResource('dishes');
     dishesResource.addMethod('GET', lambdaIntegration);
+    dishesResource.addMethod('POST', lambdaIntegration);
     const restaurantsResource = snackerApi.root.addResource('restaurants');
     restaurantsResource.addMethod('GET', lambdaIntegration);
+    restaurantsResource.addMethod('POST', lambdaIntegration);
     const featuredResource = snackerApi.root.addResource('featured');
     featuredResource.addMethod('GET', lambdaIntegration);
+    featuredResource.addMethod('POST', lambdaIntegration);
 
     // const key = snackerApi.addApiKey('ApiKey', {
     //   apiKeyName: 'snacker-api-key',
+    //   value: "supersecret12345"
     // });
 
   }
